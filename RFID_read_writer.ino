@@ -62,8 +62,6 @@ void loop(void) {
   uint8_t currentblock;                     // Counter to keep track of which block we're on
   bool authenticated = false;               // Flag to indicate if the sector is authenticated
   uint8_t data[16];                         // Array to store block data during reads
-  uint8_t data2[256];
-  uint8_t dataIndex = 0;
 
   // Keyb on NDEF and Mifare Classic should be the same
   uint8_t keyuniversal[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -133,10 +131,6 @@ void loop(void) {
           success = nfc.mifareclassic_ReadDataBlock(currentblock, data);
           if (success)
           {
-            for ( int i ; i < 16; i++, dataIndex++ )
-            {
-                data2[dataIndex] = data[i];
-            }
             // Read successful
             Serial.print("Block ");Serial.print(currentblock, DEC);
             if (currentblock < 10)
@@ -166,7 +160,6 @@ void loop(void) {
   }
   // Wait a bit before trying again
   Serial.println("\n\nSend a character to run the mem dumper again!");
-  for(int i = 0;)
   Serial.flush();
   while (!Serial.available());
   while (Serial.available()) {
