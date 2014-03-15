@@ -54,7 +54,7 @@ void setup(void) {
   Serial.println("Waiting for an ISO14443A Card ...");
 }
 
-
+int LEN_DATA_2 = 512;
 void loop(void) {
   uint8_t success;                          // Flag to check if there was an error with the PN532
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
@@ -62,6 +62,10 @@ void loop(void) {
   uint8_t currentblock;                     // Counter to keep track of which block we're on
   bool authenticated = false;               // Flag to indicate if the sector is authenticated
   uint8_t data[16];                         // Array to store block data during reads
+  uint8_t data2[LEN_DATA_2];
+  uint8_t dataIndex = 0;
+  for(int i = 0; i < LEN_DATA_2; i++)
+    data2[i] = 0;
 
   // Keyb on NDEF and Mifare Classic should be the same
   uint8_t keyuniversal[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -131,6 +135,10 @@ void loop(void) {
           success = nfc.mifareclassic_ReadDataBlock(currentblock, data);
           if (success)
           {
+            for ( int i ; i < 16 && i < LEN_DATA_2; i++, dataIndex++ )
+            {
+                data2[dataIndex] = data[i];
+            }
             // Read successful
             Serial.print("Block ");Serial.print(currentblock, DEC);
             if (currentblock < 10)
@@ -160,6 +168,8 @@ void loop(void) {
   }
   // Wait a bit before trying again
   Serial.println("\n\nSend a character to run the mem dumper again!");
+  for(int i = 0; i < LEN_DATA_2; i++)
+    Serial.print(data2[i],HEX);
   Serial.flush();
   while (!Serial.available());
   while (Serial.available()) {
