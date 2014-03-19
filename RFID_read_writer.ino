@@ -2,12 +2,12 @@
 /*!
 	@file	 mifareclassic_memdump.pde
 	@author Adafruit Industries
-@licenseBSD (see license.txt)
+	@licenseBSD (see license.txt)
 
 	This example attempts to dump the contents of a Mifare Classic 1K card
 
 	Note that you need the baud rate to be 115200 because we need to print
-out the data and read from the card at the same time!
+	out the data and read from the card at the same time!
 
 	This is an example sketch for the Adafruit PN532 NFC/RFID breakout boards
 	This library works with the Adafruit NFC breakout
@@ -54,7 +54,37 @@ nfc.SAMConfig();
 Serial.println("Waiting for an ISO14443A Card ...");
 }
 
-int LEN_DATA_2 = 512;
+class DataReader
+{
+	public:
+		DataReader();
+		uint8_t success;				// Flag to check if there was an error with the PN532
+		uint8_t uid[7];					// Buffer to store the returned UID
+		uint8_t uidLength;				// Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+		uint8_t currentblock;			// Counter to keep track of which block we're on
+		bool authenticated;				// Flag to indicate if the sector is authenticated
+		uint8_t data[16];				// Array to store block data during reads
+		static uint16_t LEN_DATA_2;
+		uint8_t data2[512];
+		uint16_t dataIndex;
+};
+
+DataReader::DataReader()
+{
+		uint8_t success;						// Flag to check if there was an error with the PN532
+		uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };// Buffer to store the returned UID
+		uint8_t uidLength;						// Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+		uint8_t currentblock;					 // Counter to keep track of which block we're on
+		bool authenticated = false;			 // Flag to indicate if the sector is authenticated
+		uint8_t data[16];						 // Array to store block data during reads
+		//uint8_t data2[LEN_DATA_2];
+		static uint16_t LEN_DATA_2 = 512;
+		uint16_t dataIndex = 0;
+		for(uint16_t i = 0; i < LEN_DATA_2; i++)
+			data2[i] = 0;
+}
+
+
 void loop(void) {
 uint8_t success;						// Flag to check if there was an error with the PN532
 uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };// Buffer to store the returned UID
@@ -62,6 +92,7 @@ uint8_t uidLength;						// Length of the UID (4 or 7 bytes depending on ISO14443
 uint8_t currentblock;					 // Counter to keep track of which block we're on
 bool authenticated = false;			 // Flag to indicate if the sector is authenticated
 uint8_t data[16];						 // Array to store block data during reads
+static uint16_t LEN_DATA_2 = 512;
 uint8_t data2[LEN_DATA_2];
 uint16_t dataIndex = 0;
 for(int i = 0; i < LEN_DATA_2; i++)
@@ -82,6 +113,8 @@ if (success) {
 	Serial.print("UID Value: ");
 	nfc.PrintHex(uid, uidLength);
 	Serial.println("");
+	Serial.println(sizeof(data2));
+	delay(10000);
 
 	if (uidLength == 4)
 	{
